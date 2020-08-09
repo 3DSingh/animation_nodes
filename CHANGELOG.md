@@ -1,4 +1,4 @@
-## Unreleased
+## 2.1.8
 
 ### Added
 
@@ -53,6 +53,7 @@
 - Migrate CI/CD pipeline to Github Workflows.
 - Moved Problems panel to UI region.
 - Add CI/CD build for Python 3.8 on Linux.
+- Rename the *Sort* node as *Sort Numbers* node.
 
 ## 2.1.7 (22 February 2020)
 
