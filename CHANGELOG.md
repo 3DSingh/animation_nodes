@@ -2,6 +2,20 @@
 
 ### Added
 
+- Added *Filter Material List By Name* node.
+
+### Fixed
+
+
+
+### Changed
+
+
+
+## 2.2.0 (01 September 2020)
+
+### Added
+
 - Added an option to hide subprogram sockets by default.
 - Added default values for Script subprogram inputs.
 - Added subtract method to the *Mix Falloff* node.
@@ -19,12 +33,30 @@
 - Added Interpolation input to *Remap Falloff* node.
 - Added *Decompose Text* node to menu.
 - Added *Repeat List Elements* node.
+- Added Material Indices to Mesh structure.
+- Added Material Indices output to *Bmesh Mesh Data* node.
+- Added Material Indices input to *Combine Mesh* node.
+- Added implicit conversion from Polygon Indices List to Integer List.
+- Added *Insert List Element* node.
+- Added option to remove Channel in *Wiggle Action* node.
+- Added Curvature output to Evaluate Spline node.
+- Added Interpolation input to *Float Range* node.
+- Added *Mesh Falloff* node.
+- Added Object property to BVH Tree socket.
 
 ### Fixed
 
+- Fixed the *Make ELement Copies* option in the *Repeat List* node.
+- Fixed the *Map Range* node when the input max is less than input min.
+- Fixed Sound nodes when scene fps base is not one.
 
 ### Changed
 
+- Removed Material Indices input from *Mesh Object Output* node.
+- Vectorized *Separate Color* node.
+- Vectorized *Separate Quaternion* node.
+- Vectorized *Combine Quaternion* node.
+- Replaced the inputs of the mesh *Construct BVH Tree* node with a mesh.
 
 # 2.1
 
