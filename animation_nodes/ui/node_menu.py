@@ -225,6 +225,7 @@ class BooleanMenu(bpy.types.Menu):
         insertNode(layout, "an_SwitchNode", "Switch")
         insertNode(layout, "an_LogicOperatorsNode", "Logic")
         insertNode(layout, "an_BooleanListLogicNode", "List Logic")
+        insertNode(layout, "an_RandomBooleanNode", "Random Boolean")
 
 class ColorMenu(bpy.types.Menu):
     bl_idname = "AN_MT_color_menu"
@@ -236,6 +237,7 @@ class ColorMenu(bpy.types.Menu):
         insertNode(layout, "an_CombineColorNode", "Combine Color")
         insertNode(layout, "an_SeparateColorNode", "Separate Color")
         insertNode(layout, "an_MixDataNode", "Mix", {"dataType" : repr("Color")})
+        insertNode(layout, "an_RandomColorNode", "Random Color")
         layout.separator()
         insertNode(layout, "an_SetVertexColorNode", "Set Vertex Color")
 
@@ -468,6 +470,7 @@ class MeshOperatorsMenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         insertNode(layout, "an_FindClosePointsNode", "Find Close Points")
+        insertNode(layout, "an_FindShortestPathNode", "Find Shortest Path")
         insertNode(layout, "an_EdgeToTubeNode", "Edge to Tube")
         insertNode(layout, "an_MeshPointsScatterNode", "Scatter Points")
         layout.separator()
@@ -545,7 +548,8 @@ class GPencilMenu(bpy.types.Menu):
         insertNode(layout, "an_SetGPStrokeAttributesNode", "Set Stroke Attributes")
         insertNode(layout, "an_ReplicateGPStrokeNode", "Replicate Stroke")
         insertNode(layout, "an_TransformGPStrokeNode", "Transform Stroke")
-        insertNode(layout, "an_OffsetGPStrokeNode", "Offset GP Stroke")
+        insertNode(layout, "an_OffsetGPStrokeNode", "Offset Stroke")
+        insertNode(layout, "an_ChangeGPStrokeDirectionNode", "Change Stroke Direction")
         layout.separator()
         insertNode(layout, "an_GPStrokeFromPointsNode", "Stroke From Points")
         insertNode(layout, "an_GPStrokeFromSplineNode", "Stroke From Spline")
