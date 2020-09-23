@@ -152,6 +152,13 @@ class NodeNetwork:
         try: return self.getNodeByID(self.scriptIDs[0], nodeByID)
         except: return None
 
+    def getSimulationOutputNode(self, nodeByID = None):
+        nodesByType = self.forestData.nodesByType['an_SimulationOutputNode']
+        for nodeByType in nodesByType:
+            node = idToNode(nodeByType)
+            if node.simulationInputIdentifier == nodeByID: return node
+        return None
+
     def getNodeByID(self, nodeID, nodeByID):
         if nodeByID is None:
             return idToNode(nodeID)
