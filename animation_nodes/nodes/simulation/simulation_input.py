@@ -4,6 +4,9 @@ from bpy.props import *
 from ... events import treeChanged
 from ... data_structures import ANStruct
 from ... base_types import AnimationNode
+from ... preferences import getColorSettings
+from ... ui.node_colors import colorAllNodes
+from ... algorithms.random import getRandomColor
 from ... utils.nodes import newNodeAtCursor, invokeTranslation
 
 class SimulationInputNode(bpy.types.Node, AnimationNode):
@@ -13,10 +16,23 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
     def inputNodeIdentifierChanged(self, context):
         treeChanged()
 
+    def networkColorChanged(self, context):
+        colorAllNodes()
+
     simulationBlockIdentifier: StringProperty(update = inputNodeIdentifierChanged)
     sceneName: StringProperty(update = inputNodeIdentifierChanged)
     startFrame: IntProperty(update = inputNodeIdentifierChanged)
     endFrame: IntProperty(update = inputNodeIdentifierChanged)
+
+    networkColor: FloatVectorProperty(name = "Network Color",
+        default = [0.5, 0.5, 0.5], subtype = "COLOR",
+        soft_min = 0.0, soft_max = 1.0,
+        update = networkColorChanged)
+
+    def setup(self):
+        self.use_custom_color = True
+        self.useNetworkColor = False
+        self.randomizeNetworkColor()
 
     def create(self):
         self.newInput("Text", "Simulation Name", "simulationName", value = '', hide = True)
@@ -25,7 +41,7 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
         self.newInput("Integer", "End Frame", "endFrame", value = 250)
         self.newInput("Scene", "Scene", "scene", hide = True)
 
-        self.newOutput("Struct", "Data", "data")
+        self.newOutput("Struct", "Data", "data", dataIsModified = True)
 
     def draw(self, layout):
         if self.outputNode is None:
@@ -57,4 +73,17 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
         node.sceneName = self.sceneName
         node.startFrame = self.startFrame
         node.endFrame = self.endFrame
+        node.use_custom_color = True
+        node.useNetworkColor = False
+        node.color = self.networkColor
         invokeTranslation()
+
+    def duplicate(self, sourceNode):
+        self.randomizeNetworkColor()
+
+    def randomizeNetworkColor(self):
+        colors = getColorSettings()
+        value = colors.subprogramValue
+        saturation = colors.subprogramSaturation
+        self.networkColor = getRandomColor(value = value, saturation = saturation)
+        self.color = self.networkColor
