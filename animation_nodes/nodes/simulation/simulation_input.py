@@ -1,11 +1,10 @@
 import bpy
 import animation_nodes
 from bpy.props import *
-from ... events import treeChanged
+from ... events import propertyChanged
 from ... data_structures import ANStruct
 from ... base_types import AnimationNode
 from ... preferences import getColorSettings
-from ... ui.node_colors import colorAllNodes
 from ... algorithms.random import getRandomColor
 from ... utils.nodes import newNodeAtCursor, invokeTranslation
 
@@ -13,21 +12,11 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SimulationInputNode"
     bl_label = "Simulation Input"
 
-    def inputNodeIdentifierChanged(self, context):
-        treeChanged()
-
-    def networkColorChanged(self, context):
-        colorAllNodes()
-
-    simulationBlockIdentifier: StringProperty(update = inputNodeIdentifierChanged)
-    sceneName: StringProperty(update = inputNodeIdentifierChanged)
-    startFrame: IntProperty(update = inputNodeIdentifierChanged)
-    endFrame: IntProperty(update = inputNodeIdentifierChanged)
-
-    networkColor: FloatVectorProperty(name = "Network Color",
-        default = [0.5, 0.5, 0.5], subtype = "COLOR",
-        soft_min = 0.0, soft_max = 1.0,
-        update = networkColorChanged)
+    simulationOutputIdentifier: StringProperty(update = propertyChanged)
+    simulationBlockIdentifier: StringProperty(update = propertyChanged)
+    sceneName: StringProperty(update = propertyChanged)
+    startFrame: IntProperty(update = propertyChanged)
+    endFrame: IntProperty(update = propertyChanged)
 
     def setup(self):
         self.use_custom_color = True
@@ -68,14 +57,11 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
 
     def createSimulationOutputNode(self):
         node = newNodeAtCursor("an_SimulationOutputNode")
+        self.simulationOutputIdentifier = node.identifier
         node.simulationInputIdentifier = self.identifier
-        node.simulationBlockIdentifier = self.simulationBlockIdentifier
-        node.sceneName = self.sceneName
-        node.startFrame = self.startFrame
-        node.endFrame = self.endFrame
         node.use_custom_color = True
         node.useNetworkColor = False
-        node.color = self.networkColor
+        node.color = self.color
         invokeTranslation()
 
     def duplicate(self, sourceNode):
@@ -85,5 +71,4 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
         colors = getColorSettings()
         value = colors.subprogramValue
         saturation = colors.subprogramSaturation
-        self.networkColor = getRandomColor(value = value, saturation = saturation)
-        self.color = self.networkColor
+        self.color = getRandomColor(value = value, saturation = saturation)
