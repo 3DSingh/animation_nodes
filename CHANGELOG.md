@@ -8,6 +8,7 @@
 - Added *Random Boolean* node.
 - Added *Random Color* node.
 - Added *Find Shortest Path* node.
+- Added *Compare Numbers* node.
 
 ### Fixed
 
@@ -15,7 +16,7 @@
 
 ### Changed
 
-
+- Vectorized *Mix* nodes.
 
 ## 2.2.0 (01 September 2020)
 
