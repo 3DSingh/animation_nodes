@@ -60,7 +60,8 @@ class MarchingTrianglesNode(bpy.types.Node, AnimationNode):
                 polygons = triangulatePolygonsUsingFanSpanMethod(polygons)
 
         cdef FalloffEvaluator falloffEvaluator = self.getFalloffEvaluator(falloff)
-        return marchingTrianglesOnMesh(vertices, polygons, falloffEvaluator, amountThreshold, _thresholds)
+        return marchingTrianglesOnMesh(vertices, polygons, falloffEvaluator, amountThreshold,
+                                       _thresholds)
 
     def getFalloffEvaluator(self, falloff):
         try: return falloff.getEvaluator("LOCATION", self.clampFalloff)

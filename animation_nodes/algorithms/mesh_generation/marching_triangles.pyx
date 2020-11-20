@@ -1,6 +1,5 @@
 import cython
-from ... utils.limits cimport INT_MAX
-from ... math cimport Vector3, toVector3
+from ... math cimport Vector3
 from ... data_structures cimport (
     Mesh,
     FloatList,
