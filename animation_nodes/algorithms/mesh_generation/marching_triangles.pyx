@@ -3,7 +3,6 @@ from ... math cimport Vector3, normalizeVec3_InPlace
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from ... data_structures cimport (
     Mesh,
-    LongList,
     FloatList,
     Vector3DList,
     EdgeIndicesList,
@@ -170,15 +169,25 @@ cdef void calculateContourSegment(Py_ssize_t a, Py_ssize_t b, Py_ssize_t c, Py_s
                                   Vector3DList points, FloatList strengths, float tolerance,
                                   VertexList* vertexList, EdgeList* edgeList,
                                   EdgePreviousList* edgePreviousList, Vector3* polyNormal):
+    cdef Py_ssize_t start, end
+    start = calculateVertexUpdateEdgePreviousList(a, b, points, strengths, tolerance, vertexList,
+                                                  edgePreviousList, polyNormal)
+    end = calculateVertexUpdateEdgePreviousList(c, d, points, strengths, tolerance, vertexList,
+                                                edgePreviousList, polyNormal)
+    if start == end: return
     cdef Py_ssize_t edgeAmount = edgeList[0].edgeAmount
     cdef Edge* edges = edgeList[0].data
+    cdef Py_ssize_t i, startExist, endExist
+    for i in range(edgeAmount):
+        startExist = edges[i].start
+        endExist = edges[i].end
+        if start == startExist and end == endExist:
+            return
+        elif start == endExist and end == startExist:
+            return
 
-    edges[edgeAmount].start = calculateVertexUpdateEdgePreviousList(a, b, points, strengths,
-                                                                    tolerance, vertexList,
-                                                                    edgePreviousList, polyNormal)
-    edges[edgeAmount].end = calculateVertexUpdateEdgePreviousList(c, d, points, strengths,
-                                                                  tolerance, vertexList,
-                                                                  edgePreviousList, polyNormal)
+    edges[edgeAmount].start = start
+    edges[edgeAmount].end = end
     edgeList[0].edgeAmount += 1
 
 
