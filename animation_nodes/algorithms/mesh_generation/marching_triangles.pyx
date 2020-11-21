@@ -19,6 +19,8 @@ def marchingTrianglesOnMesh(Vector3DList points, PolygonIndicesList polygons,
     cdef unsigned int *polyStarts = polygons.polyStarts.data
     cdef unsigned int *indices = polygons.indices.data
     cdef Py_ssize_t i, a, b, c, start
+    cdef long indexTriangle
+    cdef float tolerance
 
     meshes = []
     for i in range(polygons.getLength()):
@@ -27,12 +29,16 @@ def marchingTrianglesOnMesh(Vector3DList points, PolygonIndicesList polygons,
         b = indices[start + 1]
         c = indices[start + 2]
         for j in range(amountThreshold):
-            meshes.append(getMeshOfTriangle(points, strengths, <float>thresholds.get(j),
-                                            a, b, c))
+            tolerance = <float>thresholds.get(j)
+            indexTriangle = binaryToDecimal(a, b, c, strengths, tolerance)
+            # For casees 0 and 7.
+            if indexTriangle == 0 or indexTriangle == 7: continue
+            meshes.append(getMeshOfTriangle(points, strengths, tolerance,
+                                            indexTriangle, a, b, c))
     return Mesh.join(*meshes)
 
 def getMeshOfTriangle(Vector3DList points, FloatList strengths, float tolerance,
-                      Py_ssize_t a, Py_ssize_t b, Py_ssize_t c):
+                      long indexTriangle, Py_ssize_t a, Py_ssize_t b, Py_ssize_t c):
     '''
     Indices order for an triangle.
             a
@@ -41,10 +47,7 @@ def getMeshOfTriangle(Vector3DList points, FloatList strengths, float tolerance,
          '     '
         d-------b
     '''
-    cdef long indexTriangle = binaryToDecimal(a, b, c, strengths, tolerance)
-    if indexTriangle == 0:
-        return Mesh()
-    elif indexTriangle == 1:
+    if indexTriangle == 1:
         return getMesh(c, a, c, b, points, strengths, tolerance)
     elif indexTriangle == 2:
         return getMesh(b, c, b, a, points, strengths, tolerance)
@@ -56,8 +59,6 @@ def getMeshOfTriangle(Vector3DList points, FloatList strengths, float tolerance,
         return getMesh(a, b, c, b, points, strengths, tolerance)
     elif indexTriangle == 6:
         return getMesh(a, c, b, c, points, strengths, tolerance)
-    elif indexTriangle == 7:
-        return Mesh()
 
 cdef long binaryToDecimal(Py_ssize_t a, Py_ssize_t b, Py_ssize_t c, FloatList strengths, float t):
     cdef float sa, sb, sc
