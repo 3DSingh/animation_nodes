@@ -1,5 +1,5 @@
 import cython
-from ... math cimport Vector3
+from ... math cimport Vector3, normalizeVec3_InPlace
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from ... data_structures cimport (
     Mesh,
@@ -15,6 +15,7 @@ from ... data_structures cimport (
 
 cdef struct Vertex:
     Vector3 location
+    Vector3 normal
 
 cdef struct VertexList:
     Py_ssize_t vertexAmount
@@ -40,8 +41,8 @@ cdef struct EdgePreviousList:
     EdgePrevious *data
 
 def marchingTrianglesOnMesh(Vector3DList points, PolygonIndicesList polygons,
-                            FalloffEvaluator falloffEvaluator, long amountThreshold,
-                            VirtualDoubleList thresholds):
+                            Vector3DList polyNormals, FalloffEvaluator falloffEvaluator,
+                            long amountThreshold, VirtualDoubleList thresholds):
 
     cdef long polyAmount = polygons.getLength()
 
@@ -78,20 +79,26 @@ def marchingTrianglesOnMesh(Vector3DList points, PolygonIndicesList polygons,
     cdef unsigned int *polyStarts = polygons.polyStarts.data
     cdef unsigned int *indices = polygons.indices.data
     cdef Py_ssize_t a, b, c, start
+    cdef Vector3 *polyNormal
 
     for i in range(polyAmount):
         start = polyStarts[i]
         a = indices[start]
         b = indices[start + 1]
         c = indices[start + 2]
+        polyNormal = polyNormals.data + i
+        normalizeVec3_InPlace(polyNormal)
         for j in range(amountThreshold):
             marchingTriangle(points, strengths, <float>thresholds.get(j), a,
-                             b, c, &vertexList, &edgeList, &edgePreviousList)
+                             b, c, &vertexList, &edgeList, &edgePreviousList,
+                             polyNormal)
 
     cdef Py_ssize_t vertexAmount = vertexList.vertexAmount
     cdef Vector3DList verticesOut = Vector3DList(length = vertexAmount)
+    cdef Vector3DList normalsOut = Vector3DList(length = vertexAmount)
     for i in range(vertexAmount):
         verticesOut.data[i] = vertices[i].location
+        normalsOut.data[i] = vertices[i].normal
 
     cdef Py_ssize_t edgeAmount = edgeList.edgeAmount
     cdef EdgeIndicesList edgesOut = EdgeIndicesList(length = edgeAmount)
@@ -104,11 +111,12 @@ def marchingTrianglesOnMesh(Vector3DList points, PolygonIndicesList polygons,
     PyMem_Free(vertices)
     PyMem_Free(edges)
     PyMem_Free(edgesPrevious)
-    return Mesh(verticesOut, edgesOut, polygonsOut)
+    return Mesh(verticesOut, edgesOut, polygonsOut), normalsOut
 
 cdef void marchingTriangle(Vector3DList points, FloatList strengths, float tolerance,
                            Py_ssize_t a, Py_ssize_t b, Py_ssize_t c, VertexList* vertexList,
-                           EdgeList* edgeList, EdgePreviousList* edgePreviousList):
+                           EdgeList* edgeList, EdgePreviousList* edgePreviousList,
+                           Vector3* polyNormal):
     '''
     Indices order for an triangle.
             a
@@ -122,22 +130,22 @@ cdef void marchingTriangle(Vector3DList points, FloatList strengths, float toler
         return
     elif indexTriangle == 1:
         calculateContourSegment(c, a, c, b, points, strengths, tolerance, vertexList,
-                                edgeList, edgePreviousList)
+                                edgeList, edgePreviousList, polyNormal)
     elif indexTriangle == 2:
         calculateContourSegment(b, c, b, a, points, strengths, tolerance, vertexList,
-                                edgeList, edgePreviousList)
+                                edgeList, edgePreviousList, polyNormal)
     elif indexTriangle == 3:
         calculateContourSegment(b, a, c, a, points, strengths, tolerance, vertexList,
-                                edgeList, edgePreviousList)
+                                edgeList, edgePreviousList, polyNormal)
     elif indexTriangle == 4:
         calculateContourSegment(a, b, a, c, points, strengths, tolerance, vertexList,
-                                edgeList, edgePreviousList)
+                                edgeList, edgePreviousList, polyNormal)
     elif indexTriangle == 5:
         calculateContourSegment(a, b, c, b, points, strengths, tolerance, vertexList,
-                                edgeList, edgePreviousList)
+                                edgeList, edgePreviousList, polyNormal)
     elif indexTriangle == 6:
         calculateContourSegment(a, c, b, c, points, strengths, tolerance, vertexList,
-                                edgeList, edgePreviousList)
+                                edgeList, edgePreviousList, polyNormal)
 
 
 cdef long binaryToDecimal(Py_ssize_t a, Py_ssize_t b, Py_ssize_t c, FloatList strengths,
@@ -161,23 +169,24 @@ cdef long binaryToDecimal(Py_ssize_t a, Py_ssize_t b, Py_ssize_t c, FloatList st
 cdef void calculateContourSegment(Py_ssize_t a, Py_ssize_t b, Py_ssize_t c, Py_ssize_t d,
                                   Vector3DList points, FloatList strengths, float tolerance,
                                   VertexList* vertexList, EdgeList* edgeList,
-                                  EdgePreviousList* edgePreviousList):
+                                  EdgePreviousList* edgePreviousList, Vector3* polyNormal):
     cdef Py_ssize_t edgeAmount = edgeList[0].edgeAmount
     cdef Edge* edges = edgeList[0].data
 
     edges[edgeAmount].start = calculateVertexUpdateEdgePreviousList(a, b, points, strengths,
                                                                     tolerance, vertexList,
-                                                                    edgePreviousList)
+                                                                    edgePreviousList, polyNormal)
     edges[edgeAmount].end = calculateVertexUpdateEdgePreviousList(c, d, points, strengths,
                                                                   tolerance, vertexList,
-                                                                  edgePreviousList)
+                                                                  edgePreviousList, polyNormal)
     edgeList[0].edgeAmount += 1
 
 
 cdef Py_ssize_t calculateVertexUpdateEdgePreviousList(Py_ssize_t a, Py_ssize_t b,
                                                       Vector3DList points, FloatList strengths,
                                                       float tolerance, VertexList* vertexList,
-                                                      EdgePreviousList* edgePreviousList):
+                                                      EdgePreviousList* edgePreviousList,
+                                                      Vector3* polyNormal):
     cdef Py_ssize_t vertexAmount = vertexList[0].vertexAmount
     cdef Vertex* vertices = vertexList[0].data
 
@@ -202,6 +211,7 @@ cdef Py_ssize_t calculateVertexUpdateEdgePreviousList(Py_ssize_t a, Py_ssize_t b
                  tolerance)
         vertexIndex = vertexAmount
         vertices[vertexAmount].location = v
+        vertices[vertexAmount].normal = polyNormal[0]
         vertexList[0].vertexAmount += 1
 
     edgesPrevious[edgePreviousAmount].vertexIndex = vertexIndex
