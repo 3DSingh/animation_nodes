@@ -29,7 +29,7 @@ class MarchingTrianglesNode(bpy.types.Node, AnimationNode):
     __annotations__["useToleranceList"] = VectorizedSocket.newProperty()
 
     def create(self):
-        self.newInput("Mesh", "Mesh", "mesh")
+        self.newInput("Mesh", "Mesh", "mesh", dataIsModified = True)
         self.newInput("Falloff", "Falloff", "falloff")
         self.newInput(VectorizedSocket("Float", "useToleranceList",
             ("Threshold", "thresholds"), ("Thresholds", "thresholds")), value = 0.25)
