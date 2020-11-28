@@ -2,6 +2,7 @@ import bpy
 from bpy.props import *
 from ... events import propertyChanged
 from ... base_types import AnimationNode, VectorizedSocket
+from ... data_structures.meshes.mesh_data import calculatePolygonNormals
 from ... algorithms.mesh_generation.marching_triangles import marchingTrianglesOnMesh
 from ... algorithms.mesh.triangulate_mesh import (
     triangulatePolygonsUsingFanSpanMethod,
@@ -28,12 +29,13 @@ class MarchingTrianglesNode(bpy.types.Node, AnimationNode):
     __annotations__["useToleranceList"] = VectorizedSocket.newProperty()
 
     def create(self):
-        self.newInput("Mesh", "Mesh", "mesh")
+        self.newInput("Mesh", "Mesh", "mesh", dataIsModified = True)
         self.newInput("Falloff", "Falloff", "falloff")
         self.newInput(VectorizedSocket("Float", "useToleranceList",
             ("Threshold", "thresholds"), ("Thresholds", "thresholds")), value = 0.25)
 
         self.newOutput("Mesh", "Mesh", "mesh")
+        self.newOutput("Vector List", "Normals", "normals", hide = True)
 
     def drawAdvanced(self, layout):
         layout.prop(self, "useAdvancedTriangulationMethod")
@@ -43,7 +45,7 @@ class MarchingTrianglesNode(bpy.types.Node, AnimationNode):
         cdef PolygonIndicesList polygons = mesh.polygons
 
         if vertices.length == 0 or polygons.getLength() == 0:
-            return Mesh()
+            return Mesh(), Vector3DList()
 
         cdef VirtualDoubleList _thresholds = VirtualDoubleList.create(thresholds, 0)
         cdef long amountThreshold
@@ -58,10 +60,11 @@ class MarchingTrianglesNode(bpy.types.Node, AnimationNode):
                 polygons = triangulatePolygonsUsingEarClipMethod(vertices, polygons)
             else:
                 polygons = triangulatePolygonsUsingFanSpanMethod(polygons)
+        cdef Vector3DList polyNormals = calculatePolygonNormals(vertices, polygons)
 
         cdef FalloffEvaluator falloffEvaluator = self.getFalloffEvaluator(falloff)
-        return marchingTrianglesOnMesh(vertices, polygons, falloffEvaluator, amountThreshold,
-                                       _thresholds)
+        return marchingTrianglesOnMesh(vertices, polygons, polyNormals, falloffEvaluator,
+                                       amountThreshold, _thresholds)
 
     def getFalloffEvaluator(self, falloff):
         try: return falloff.getEvaluator("LOCATION", self.clampFalloff)
