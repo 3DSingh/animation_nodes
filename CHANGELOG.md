@@ -11,12 +11,15 @@
 - Added *Compare Numbers* node.
 - Added *Copy Object Modifiers* node.
 - Added *Export Headers* option to the setup script.
+- Added *Indices* output to *Get Random List Elements* node.
 
 ### Fixed
 
 - Fixed nextBoolean method for XoShiRo256StarStar generators.
 - Fixed OpenGL fragment shaders on Core contexts.
 - Fixed triangulateMesh method of Mesh.
+- Fixed freeze in Is Inside Volume node.
+- Fixed Grease Pencil Nodes for API changes.
 
 ### Changed
 
