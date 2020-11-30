@@ -30,7 +30,7 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
         self.newInput("Integer", "End Frame", "endFrame", value = 250)
         self.newInput("Scene", "Scene", "scene", hide = True)
 
-        self.newOutput("Struct", "Data", "data", dataIsModified = True)
+        self.newOutput("Struct", "Data", "data")
 
     def draw(self, layout):
         if self.outputNode is None:

@@ -12,7 +12,7 @@ class SimulationOutputNode(bpy.types.Node, AnimationNode):
     simulationInputIdentifier: StringProperty(update = propertyChanged)
 
     def create(self):
-        self.newInput("Struct", "Data", "data")
+        self.newInput("Struct", "Data", "data", dataIsModified = True)
 
     def execute(self, data):
         if data is None: return
