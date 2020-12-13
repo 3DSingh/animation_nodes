@@ -12,6 +12,7 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SimulationInputNode"
     bl_label = "Simulation Input"
 
+    simulationBlockID = 0
     simulationOutputIdentifier: StringProperty(update = propertyChanged)
     simulationBlockIdentifier: StringProperty(update = propertyChanged)
     sceneName: StringProperty(update = propertyChanged)
@@ -35,10 +36,9 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
         if self.outputNode is None:
             self.invokeFunction(layout, "createSimulationOutputNode", text = "Output Node", icon = "PLUS")
 
-    instanceCount = 0
     def execute(self, dataInitial, startFrame, endFrame, scene):
-        self.instanceCount += 1
-        simulationBlockIdentifier = self.identifier + str(self.instanceCount)
+        self.simulationBlockID += 1
+        simulationBlockIdentifier = self.identifier + str(self.simulationBlockID)
         self.simulationBlockIdentifier = simulationBlockIdentifier
         self.sceneName = scene.name
         self.startFrame = startFrame
