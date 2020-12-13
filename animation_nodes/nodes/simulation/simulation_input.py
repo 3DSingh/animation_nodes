@@ -1,5 +1,4 @@
 import bpy
-import animation_nodes
 from bpy.props import *
 from ... events import propertyChanged
 from ... data_structures import ANStruct
@@ -13,6 +12,7 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
     bl_label = "Simulation Input"
 
     simulationBlockID = 0
+    simulationBlocks = {}
     simulationOutputIdentifier: StringProperty(update = propertyChanged)
     simulationBlockIdentifier: StringProperty(update = propertyChanged)
     sceneName: StringProperty(update = propertyChanged)
@@ -46,11 +46,10 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
 
         currentFrame = scene.frame_current
         if currentFrame < startFrame:
-            setattr(animation_nodes, simulationBlockIdentifier, ANStruct())
+            self.simulationBlocks[simulationBlockIdentifier] = ANStruct()
         if currentFrame == startFrame:
-            setattr(animation_nodes, simulationBlockIdentifier, dataInitial)
-        if not hasattr(animation_nodes, simulationBlockIdentifier): return ANStruct()
-        return getattr(animation_nodes, simulationBlockIdentifier)
+            self.simulationBlocks[simulationBlockIdentifier] = dataInitial
+        return self.simulationBlocks.get(simulationBlockIdentifier, ANStruct())
 
     @property
     def outputNode(self):

@@ -1,5 +1,4 @@
 import bpy
-import animation_nodes
 from bpy.props import *
 from ... events import propertyChanged
 from ... base_types import AnimationNode
@@ -29,7 +28,7 @@ class SimulationOutputNode(bpy.types.Node, AnimationNode):
         if self.previousFrames.get(previousFrameIdentifier, None) == currentFrame: return
         if currentFrame >= inputNode.startFrame and currentFrame <= inputNode.endFrame:
             self.previousFrames[previousFrameIdentifier] = currentFrame
-            setattr(animation_nodes, inputNode.simulationBlockIdentifier, data)
+            inputNode.simulationBlocks[inputNode.simulationBlockIdentifier] = data
 
     def inputNode(self):
         return self.network.getSimulationInputNode(self.identifier)
