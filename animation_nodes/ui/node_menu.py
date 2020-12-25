@@ -33,6 +33,7 @@ def drawMenu(self, context):
     layout.menu("AN_MT_spline_menu", text = "Spline", icon = "CURVE_DATA")
     layout.menu("AN_MT_gpencil_menu", text = "Grease Pencil", icon = "OUTLINER_OB_GREASEPENCIL")
     layout.menu("AN_MT_particle_system_menu", text = "Particle System", icon = "PARTICLE_DATA")
+    layout.menu("AN_MT_simulation_menu", text = "Simulation", icon = "PHYSICS")
     layout.separator()
     layout.menu("AN_MT_animation_menu", text = "Animation", icon = "RENDER_ANIMATION")
     layout.menu("AN_MT_interpolation_menu", text = "Interpolation", icon = "IPO_BEZIER")
@@ -663,6 +664,17 @@ class ParticleSystemMenu(bpy.types.Menu):
         insertNode(layout, "an_ParticleSystemsFromObjectNode", "From Object")
         insertNode(layout, "an_ParticleSystemParticlesDataNode", "Particles Data")
         insertNode(layout, "an_ParticleSystemHairDataNode", "Hair Data")
+
+class SimulationMenu(bpy.types.Menu):
+    bl_idname = "AN_MT_simulation_menu"
+    bl_label = "Simulation Menu"
+
+    def draw(self, context):
+        layout = self.layout
+        insertNode(layout, "an_SimulationInputNode", "Simulation Input")
+        layout.separator()
+        insertNode(layout, "an_SetStructElementsNode", "Set Struct Elements")
+        insertNode(layout, "an_GetStructElementsNode", "Get Struct Elements")
 
 class FCurveMenu(bpy.types.Menu):
     bl_idname = "AN_MT_fcurve_menu"
