@@ -8,16 +8,12 @@ class SimulationOutputNode(bpy.types.Node, AnimationNode):
     bl_label = "Simulation Output"
     onlySearchTags = True
 
-    previousFrameID = 0
-    previousFrames = {}
     simulationInputIdentifier: StringProperty(update = propertyChanged)
 
     def create(self):
         self.newInput("Struct", "Data", "data", dataIsModified = True)
 
     def execute(self, data):
-        self.previousFrameID += 1
-        previousFrameIdentifier = self.identifier + str(self.previousFrameID)
         if data is None: return
 
         inputNode = self.inputNode()
@@ -25,10 +21,11 @@ class SimulationOutputNode(bpy.types.Node, AnimationNode):
         self.setColor(inputNode)
 
         currentFrame = bpy.data.scenes[inputNode.sceneName].frame_current
-        if self.previousFrames.get(previousFrameIdentifier, None) == currentFrame: return
         if currentFrame >= inputNode.startFrame and currentFrame <= inputNode.endFrame:
-            self.previousFrames[previousFrameIdentifier] = currentFrame
-            inputNode.simulationBlocks[inputNode.simulationBlockIdentifier] = data
+            simulationBlockIdentifier = inputNode.simulationBlockIdentifier + str(currentFrame + 1)
+            if inputNode.simulationBlockFrames.get(simulationBlockIdentifier, None) is None:
+                inputNode.simulationBlocks[simulationBlockIdentifier] = data
+                inputNode.simulationBlockFrames[simulationBlockIdentifier] = currentFrame + 1
 
     def inputNode(self):
         return self.network.getSimulationInputNode(self.identifier)
