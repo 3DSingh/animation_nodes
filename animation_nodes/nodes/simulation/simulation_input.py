@@ -47,7 +47,7 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
 
         currentFrame = scene.frame_current
         if currentFrame < startFrame:
-            self.resetSimulationBlock(simulationBlockIdentifier, min(currentFrame, startFrame), endFrame)
+            return ANStruct()
         if currentFrame == startFrame:
             self.resetSimulationBlock(simulationBlockIdentifier, startFrame, endFrame)
             self.simulationBlocks[simulationBlockIdentifier + str(currentFrame)] = dataInitial
@@ -56,6 +56,11 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
         return self.simulationBlocks.get(simulationBlockIdentifier + str(currentFrame), ANStruct())
 
     def resetSimulationBlock(self, simulationBlockIdentifier, start, end):
+        for key in list(self.simulationBlocks.keys()):
+            if key.startswith(simulationBlockIdentifier):
+                self.simulationBlocks.pop(key, None)
+                self.simulationBlockFrames.pop(key, None)
+
         for i in range(start, end + 1):
             self.simulationBlocks[simulationBlockIdentifier + str(i)] = ANStruct()
             self.simulationBlockFrames[simulationBlockIdentifier + str(i)] = None
