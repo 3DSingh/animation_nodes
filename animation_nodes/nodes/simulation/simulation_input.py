@@ -26,7 +26,7 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
         self.randomizeNetworkColor()
 
     def create(self):
-        self.newInput("Struct", "Initial Data", "dataInitial")
+        self.newInput("Struct", "Initial Data", "dataInitial", dataIsModified = True)
         self.newInput("Integer", "Start Frame", "startFrame", value = 1)
         self.newInput("Integer", "End Frame", "endFrame", value = 250)
         self.newInput("Scene", "Scene", "scene", hide = True)
@@ -39,7 +39,7 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
 
     def execute(self, dataInitial, startFrame, endFrame, scene):
         self.simulationBlockID += 1
-        simulationBlockIdentifier = self.identifier + str(self.simulationBlockID)
+        simulationBlockIdentifier = self.identifier + str(self.simulationBlockID) + "_"
         self.simulationBlockIdentifier = simulationBlockIdentifier
         self.sceneName = scene.name
         self.startFrame = startFrame
@@ -56,7 +56,7 @@ class SimulationInputNode(bpy.types.Node, AnimationNode):
         return self.simulationBlocks.get(simulationBlockIdentifier + str(currentFrame), ANStruct())
 
     def resetSimulationBlock(self, simulationBlockIdentifier, start, end):
-        for i in range(start, end):
+        for i in range(start, end + 1):
             self.simulationBlocks[simulationBlockIdentifier + str(i)] = ANStruct()
             self.simulationBlockFrames[simulationBlockIdentifier + str(i)] = None
 
