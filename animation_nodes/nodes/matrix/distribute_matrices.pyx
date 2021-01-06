@@ -37,10 +37,19 @@ splineDistributionMethodItems = (
     ("VERTICES", "Vertices", "", "NONE", 3),
 )
 
+searchItems = {
+    "Distribute Linear" : "LINEAR",
+    "Distribute Grid" : "GRID",
+    "Distribute Circle" : "CIRCLE",
+    "Distribute MESH" : "MESH",
+    "Distribute Spiral" : "SPIRAL",
+    "Distribute Spline" : "SPLINE",
+}
+
 class DistributeMatricesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_DistributeMatricesNode"
     bl_label = "Distribute Matrices"
-    bl_width_default = 160
+    searchTags = [(name, {"mode" : repr(op)}) for name, op in searchItems.items()]
 
     __annotations__ = {}
 
@@ -309,6 +318,7 @@ class DistributeMatricesNode(bpy.types.Node, AnimationNode):
 
     def execute_SplineVertices(self, Spline spline):
         if not spline.isEvaluable(): return Matrix4x4List()
+        spline.ensureNormals()
         count = len(spline.points)
         return spline.getDistributedMatrices(count, 0, 1, "RESOLUTION")
 
